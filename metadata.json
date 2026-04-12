@@ -1,0 +1,5 @@
+{
+  "name": "Markdown Magic",
+  "description": "A simple and quick app to convert raw text into well-structured Markdown using Gemini.",
+  "requestFramePermissions": []
+}
