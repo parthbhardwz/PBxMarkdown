@@ -16,6 +16,11 @@ export default function Home() {
   const handleConvert = async () => {
     if (!rawText.trim()) return;
     
+    if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+      alert('Configuration Error: NEXT_PUBLIC_GEMINI_API_KEY is missing. Please add this environment variable in your Netlify deployment settings.');
+      return;
+    }
+    
     setIsConverting(true);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
@@ -28,9 +33,9 @@ export default function Home() {
       });
       
       setMarkdown(response.text || '');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error converting text:', error);
-      alert('Failed to convert text. Please try again.');
+      alert(`Failed to convert text: ${error?.message || 'Unknown error'}. Please check your API key and Netlify logs.`);
     } finally {
       setIsConverting(false);
     }
@@ -71,16 +76,16 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#ffffff] font-sans flex flex-col selection:bg-white/30">
-      <header className="px-8 py-6 border-b border-white/10 flex items-center justify-between">
+    <div className="h-[100dvh] bg-[#000000] text-[#ffffff] font-sans flex flex-col selection:bg-white/30 overflow-hidden">
+      <header className="px-6 lg:px-8 py-4 lg:py-6 border-b border-white/10 flex items-center justify-between shrink-0">
         <h1 className="text-xs font-medium tracking-[0.2em] uppercase">Markdown Magic</h1>
         <div className="text-[10px] uppercase tracking-widest text-white/40">AI Formatting Tool</div>
       </header>
 
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-2">
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {/* Left Pane: Input */}
-        <div className="p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col h-full">
-          <div className="flex justify-between items-center mb-10">
+        <div className="flex-1 lg:w-1/2 p-6 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col overflow-hidden min-h-0">
+          <div className="flex justify-between items-center mb-6 lg:mb-10 shrink-0">
             <span className="text-[10px] uppercase tracking-widest text-white/40">01 / Input</span>
             <button
               onClick={handleClear}
@@ -92,13 +97,13 @@ export default function Home() {
           </div>
           
           <textarea
-            className="flex-1 w-full resize-none outline-none text-xl font-light leading-relaxed placeholder:text-white/20 bg-transparent text-white/90"
+            className="flex-1 w-full resize-none outline-none text-lg lg:text-xl font-light leading-relaxed placeholder:text-white/20 bg-transparent text-white/90 overflow-auto min-h-0"
             placeholder="Type or paste your unstructured text here..."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
           
-          <div className="mt-8 pt-8 border-t border-white/10 flex justify-end">
+          <div className="mt-6 lg:mt-8 pt-6 lg:pt-8 border-t border-white/10 flex justify-end shrink-0">
             <button
               onClick={handleConvert}
               disabled={!rawText.trim() || isConverting}
@@ -120,8 +125,8 @@ export default function Home() {
         </div>
 
         {/* Right Pane: Output */}
-        <div className="p-8 lg:p-12 flex flex-col h-full bg-[#050505]">
-          <div className="flex justify-between items-center mb-10 h-4">
+        <div className="flex-1 lg:w-1/2 p-6 lg:p-12 flex flex-col bg-[#050505] overflow-hidden min-h-0">
+          <div className="flex justify-between items-center mb-6 lg:mb-10 h-4 shrink-0">
             <span className="text-[10px] uppercase tracking-widest text-white/40">02 / Output</span>
             
             <AnimatePresence>
@@ -130,7 +135,7 @@ export default function Home() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-6"
+                  className="flex items-center gap-4 lg:gap-6"
                 >
                   <button
                     onClick={handleCopy}
@@ -155,7 +160,7 @@ export default function Home() {
             </AnimatePresence>
           </div>
           
-          <div className="flex-1 overflow-auto relative">
+          <div className="flex-1 overflow-auto relative min-h-0">
             <AnimatePresence mode="wait">
               {markdown ? (
                 <motion.div 
@@ -163,7 +168,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="prose prose-invert prose-sm sm:prose-base max-w-none prose-headings:font-normal prose-headings:tracking-tight prose-a:text-white prose-a:underline prose-a:underline-offset-4 prose-pre:bg-[#111] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-lg"
+                  className="prose prose-invert prose-sm sm:prose-base max-w-none prose-headings:font-normal prose-headings:tracking-tight prose-a:text-white prose-a:underline prose-a:underline-offset-4 prose-pre:bg-[#111] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-lg pb-8"
                 >
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {markdown}
